@@ -4,7 +4,7 @@
 
 ## Description
 
-This is an app to look for dogsitters. 
+This is an app to look for dogsitters.
 
 <br>
 
@@ -229,7 +229,7 @@ size: {type: String, enum: ['small', 'medium', 'large'],
 
 ### Github
 
-[Server Repository]()
+[Server Repository](https://github.com/NubivagantYansa/Boop_server)
 
 [Client Repository]()
 
