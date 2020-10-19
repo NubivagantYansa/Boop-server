@@ -225,13 +225,13 @@ size: {type: String, enum: ['small', 'medium', 'large'],
 
 ### Trello
 
-[Go to Trello Board]()
+[Go to Trello Board](https://trello.com/b/0WXX4m1Z/project-3-boop)
 
 ### Github
 
 [Server Repository](https://github.com/NubivagantYansa/Boop_server)
 
-[Client Repository]()
+[Client Repository](https://github.com/NubivagantYansa/Boop_Client)
 
 [Deployed App Link](
 
