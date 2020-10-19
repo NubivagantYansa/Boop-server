@@ -4,7 +4,7 @@
 
 ## Description
 
-This is an app to look for dogsitters.
+This is a platform where dog owners can look for dogsitters and vice versa.
 
 <br>
 
