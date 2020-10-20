@@ -5,9 +5,9 @@ const { Schema, model } = require("mongoose");
 const userSchema = new Schema(
   {
     userRole: {
-      String,
-      enum: ["Doggo", "Doggositter"],
-      required: [true, "Type of user is required. Pick one from the list"],
+      type: String,
+      enum: ["doggo", "doggositter"],
+      required: [true, "Type of user is required."],
     },
     username: {
       type: String,

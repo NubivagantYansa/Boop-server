@@ -1,27 +1,12 @@
+require("dotenv/config");
 const express = require("express");
-const cookieParser = require("cookie-parser");
-const logger = require("morgan");
-const cors = require("cors");
 require("./config/db.config");
 
-//Router definition
-const userRouter = require("./routes/user.route");
-
 const app = express();
+require("./setup/index")(app);
 
-//CORS configuration
-app.use(
-  cors({
-    credentials: true,
-    origin: process.env.ORIGIN,
-  })
-);
-
-app.use(logger("dev"));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
-
-app.use("/user", userRouter);
+//Routers definition
+app.use("/auth", require("./routes/auth.route"));
+app.use("/user", require("./routes/user.route"));
 
 module.exports = app;
