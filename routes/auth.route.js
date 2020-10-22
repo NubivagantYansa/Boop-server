@@ -5,16 +5,18 @@ const bcryptjs = require("bcryptjs");
 const saltRounds = 10;
 const User = require("../models/User.model");
 const Session = require("../models/Session.model");
+const Features = require("../models/Features.model");
 const mongoose = require("mongoose");
+const { isProd } = require("../utils");
 
 //---------------> SIGNUP <---------------------------
 
 // .post() route ==> to process form data
-router.post("/signup", (req, res, next) => {
+router.post("/signup", async (req, res, next) => {
   const {
     userRole,
     username,
-    password,
+    password: toHash,
     email,
     image,
     aboutMe,
@@ -22,7 +24,7 @@ router.post("/signup", (req, res, next) => {
     features,
   } = req.body;
 
-  if (!username || !email || !password) {
+  if (!username || !email || !toHash) {
     res.status(200).json({
       errorMessage:
         "All fields are mandatory. Please provide your username, email and password.",
@@ -31,51 +33,55 @@ router.post("/signup", (req, res, next) => {
   }
 
   // make sure passwords are strong:
-
-  // const regex = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/;
-  // if (!regex.test(password)) {
-  //   res.status(200).json({
-  //     errorMessage:
-  //       "Password needs to have at least 6 chars and must contain at least one number, one lowercase and one uppercase letter.",
-  //   });
-  //   return;
-  // }
-
-  bcryptjs
-    .genSalt(saltRounds)
-    .then((salt) => bcryptjs.hash(password, salt))
-    .then((password) => {
-      return User.create({
-        userRole,
-        username,
-        password,
-        email,
-        image,
-        aboutMe,
-        borough,
-        features,
+  if (isProd) {
+    const regex = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/;
+    if (!regex.test(toHash)) {
+      res.status(200).json({
+        errorMessage:
+          "Password needs to have at least 6 chars and must contain at least one number, one lowercase and one uppercase letter.",
       });
-    })
-    .then((user) => {
-      Session.create({
-        userId: user._id,
-        createdAt: Date.now(),
-      }).then((session) => {
-        res.status(200).json({ accessToken: session._id, user });
-      });
-    })
-    .catch((error) => {
-      if (error instanceof mongoose.Error.ValidationError) {
-        res.status(200).json({ errorMessage: error.message });
-      } else if (error.code === 11000) {
-        res.status(200).json({
-          errorMessage:
-            "Username and email need to be unique. Either username or email is already used.",
-        });
-      } else {
-        res.status(500).json({ errorMessage: error });
-      }
+      return;
+    }
+  }
+
+  try {
+    const salt = await bcryptjs.genSalt(saltRounds);
+    const password = await bcryptjs.hash(toHash, salt);
+    const user = await User.create({
+      userRole,
+      username,
+      password,
+      email,
+      image,
+      aboutMe,
+      borough,
     });
+    const session = await Session.create({
+      userId: user._id,
+      createdAt: Date.now(),
+    });
+    const feature = await Features.create({ ...features, author: user._id });
+    const newUser = await User.findByIdAndUpdate(
+      user._id,
+      { $addToSet: { features: feature._id } },
+      { new: true }
+    );
+
+    return res
+      .status(200)
+      .json({ accessToken: session._id, user: newUser, feature });
+  } catch (error) {
+    if (error instanceof mongoose.Error.ValidationError) {
+      res.status(200).json({ errorMessage: error.message });
+    } else if (error.code === 11000) {
+      res.status(200).json({
+        errorMessage:
+          "Username and email need to be unique. Either username or email is already used.",
+      });
+    } else {
+      res.status(500).json({ errorMessage: error });
+    }
+  }
 });
 
 //---------------> LOGIN <---------------------------

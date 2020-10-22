@@ -1,43 +1,59 @@
 // models/Features.model.js
 
 const { Schema, model } = require("mongoose");
-
+const { isProd } = require("../utils");
 const FeaturesSchema = new Schema(
   {
+    author: { type: Schema.Types.ObjectId, ref: "User" },
     size: {
       type: String,
       enum: ["small", "medium", "large"],
-      required: [true, "Size is required, pick one of the listed items"],
+      required:
+        isProd === "production"
+          ? [true, "Size is required, pick one of the listed items"]
+          : false,
     },
     energy: {
       type: String,
       enum: ["tornado", "chilled", "couch potato"],
-      required: [
-        true,
-        "Energy level is required, pick one of the listed items",
-      ],
+      required:
+        isProd === "production"
+          ? [true, "Energy level is required, pick one of the listed items"]
+          : false,
     },
     behaves: {
       type: String,
       enum: ["soldier", "I kinda get it", "huh?"],
-      required: [true, "Behavior is required, pick one of the listed items"],
+      required:
+        isProd === "production"
+          ? [true, "Behavior is required, pick one of the listed items"]
+          : false,
     },
     pottyTraining: {
       type: String,
       enum: ["expert", "okay", "ouch!"],
-      required: [
-        true,
-        "Potty Training state is required, pick one of the listed items",
-      ],
+      required:
+        isProd === "production"
+          ? [
+              true,
+              "Potty Training state is required, pick one of the listed items",
+            ]
+          : false,
     },
     chill: {
       type: String,
       enum: ["indoor", "outdoor"],
-      required: [true, "Energy is required, pick one of the listed items"],
+      required:
+        isProd === "production"
+          ? [true, "Energy is required, pick one of the listed items"]
+          : false,
     },
     breed: {
       type: String,
-      required: [true, "Energy is required, pick one of the listed items"],
+      required:
+        isProd === "production"
+          ? [true, "Energy is required, pick one of the listed items"]
+          : false,
     },
   },
   {

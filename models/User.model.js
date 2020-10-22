@@ -1,23 +1,26 @@
 // models/User.model.js
 
 const { Schema, model } = require("mongoose");
+const { isProd } = require("../utils");
 
 const userSchema = new Schema(
   {
     userRole: {
       type: String,
-      enum: ["doggo", "doggositter"],
-      required: [true, "Type of user is required."],
+      enum: ["Dog owner", "Dogsitter"],
+      required:
+        isProd === "production" ? [true, "Type of user is required."] : false,
     },
     username: {
       type: String,
       trim: true,
-      required: [true, "Username is required."],
+      required:
+        isProd === "production" ? [true, "Username is required."] : false,
       unique: true,
     },
     email: {
       type: String,
-      required: [true, "Email is required."],
+      required: isProd === "production" ? [true, "Email is required."] : false,
       // this match will disqualify all the emails with accidental empty spaces, missing dots in front of (.)com and the ones with no domain at all
       // match: [/^\S+@\S+\.\S+$/, "Please use a valid email address."],
       unique: true,
@@ -26,21 +29,26 @@ const userSchema = new Schema(
     },
     password: {
       type: String,
-      required: [true, "Password is required."],
+      required:
+        isProd === "production" ? [true, "Password is required."] : false,
     },
     image: {
       type: String,
-      required: [true, "Image is required."],
+      required: isProd === "production" ? [true, "Image is required."] : false,
     },
     aboutMe: {
       type: String,
-      required: [true, "A brief description is required."],
+      required:
+        isProd === "production"
+          ? [true, "A brief description is required."]
+          : false,
     },
     borough: {
       type: String,
-      required: [true, "Please pick a Borough"],
+      required:
+        isProd === "production" ? [true, "Please pick a Borough"] : false,
     },
-    Features: [{ type: Schema.Types.ObjectId, ref: "Features" }],
+    features: [{ type: Schema.Types.ObjectId, ref: "Features" }],
   },
   {
     timestamps: true,
