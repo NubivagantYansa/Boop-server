@@ -1,6 +1,7 @@
 // models/User.model.js
 
 const { Schema, model } = require("mongoose");
+const ObjectId = Schema.Types.ObjectId;
 const { isProd } = require("../utils");
 
 const userSchema = new Schema(
@@ -21,7 +22,6 @@ const userSchema = new Schema(
     email: {
       type: String,
       required: isProd === "production" ? [true, "Email is required."] : false,
-      // this match will disqualify all the emails with accidental empty spaces, missing dots in front of (.)com and the ones with no domain at all
       // match: [/^\S+@\S+\.\S+$/, "Please use a valid email address."],
       unique: true,
       lowercase: true,
@@ -48,7 +48,7 @@ const userSchema = new Schema(
       required:
         isProd === "production" ? [true, "Please pick a Borough"] : false,
     },
-    features: [{ type: Schema.Types.ObjectId, ref: "Features" }],
+    features: { type: ObjectId, ref: "Features" },
   },
   {
     timestamps: true,

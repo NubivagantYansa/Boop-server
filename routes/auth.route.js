@@ -9,7 +9,10 @@ const Features = require("../models/Features.model");
 const mongoose = require("mongoose");
 const { isProd } = require("../utils");
 
-//---------------> SIGNUP <---------------------------
+/**  ============================
+ *          Signup
+ *   ============================
+ */
 
 // .post() route ==> to process form data
 router.post("/signup", async (req, res, next) => {
@@ -21,7 +24,7 @@ router.post("/signup", async (req, res, next) => {
     image,
     aboutMe,
     borough,
-    features,
+    features: featuresDb,
   } = req.body;
 
   if (!username || !email || !toHash) {
@@ -60,16 +63,16 @@ router.post("/signup", async (req, res, next) => {
       userId: user._id,
       createdAt: Date.now(),
     });
-    const feature = await Features.create({ ...features, author: user._id });
+    const features = await Features.create({ ...featuresDb, author: user._id });
     const newUser = await User.findByIdAndUpdate(
       user._id,
-      { $addToSet: { features: feature._id } },
+      { $addToSet: { features: features._id } },
       { new: true }
     );
 
     return res
       .status(200)
-      .json({ accessToken: session._id, user: newUser, feature });
+      .json({ accessToken: session._id, user: newUser, features });
   } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {
       res.status(200).json({ errorMessage: error.message });
@@ -84,10 +87,13 @@ router.post("/signup", async (req, res, next) => {
   }
 });
 
-//---------------> LOGIN <---------------------------
+/**  ============================
+ *         Login
+ *   ============================
+ */
 
 // .post() login route ==> to process form data
-router.post("/login", (req, res, next) => {
+router.post("/login", async (req, res, next) => {
   const { email, password } = req.body;
 
   if (email === "" || password === "") {
@@ -97,31 +103,72 @@ router.post("/login", (req, res, next) => {
     return;
   }
 
-  User.findOne({ email })
-    .then((user) => {
-      if (!user) {
-        res.status(200).json({
-          errorMessage: "Email is not registered. Try with other email.",
-        });
-        return;
-      } else if (bcryptjs.compareSync(password, user.password)) {
-        Session.create({
-          userId: user._id,
-          createdAt: Date.now(),
-        }).then((session) => {
-          res.status(200).json({ accessToken: session._id, user });
-        });
-      } else {
-        res.status(200).json({ errorMessage: "Incorrect password." });
-      }
-    })
-    .catch((error) => res.status(500).json({ errorMessage: error }));
+  try {
+    //find user
+    const user = await User.findOne({ email });
+    console.log("user", user);
+    //check password
+    const passwordCheck = await bcryptjs.compareSync(password, user.password);
+    //create session
+    let session;
+    if (passwordCheck) {
+      session = await Session.create({
+        userId: user._id,
+        createdAt: Date.now(),
+      });
+    }
+    //get features
+    const features = await Features.findOne({ author: user._id });
+    console.log("HERE THE FEATURES", features);
+
+    return res.status(200).json({ accessToken: session._id, user, features });
+  } catch (error) {
+    if (!user) {
+      res.status(200).json({
+        errorMessage: "Email is not registered. Try with other email.",
+      });
+    }
+    if (!bcryptjs.compareSync(password, user.password)) {
+      res.status(200).json({ errorMessage: "Incorrect password." });
+    }
+    res.status(500).json({ errorMessage: error });
+  }
+
+  // User.findOne({ email })
+  //   .then((user) => {
+  //     if (!user) {
+  //       res.status(200).json({
+  //         errorMessage: "Email is not registered. Try with other email.",
+  //       });
+  //       return;
+  //     } else if (bcryptjs.compareSync(password, user.password)) {
+  //       Session.create({
+  //         userId: user._id,
+  //         createdAt: Date.now(),
+  //       }).then((session) => {
+  //         res.status(200).json({ accessToken: session._id, user });
+  //       });
+  //     } else {
+  //       res.status(200).json({ errorMessage: "Incorrect password." });
+  //     }
+  //   })
+  //   .catch((error) => res.status(500).json({ errorMessage: error }));
 });
 
-////////////////////////////////////////////////////////////////////////
-///////////////////////////// LOGOUT ////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
+/**  ============================
+ *          Logout
+ *   ============================
+ */
 
+// router.delete("/logout/:accessToken", (req, res) => {
+//   const { accessToken } = req.params;
+//   console.log("delete accessToken", accessToken);
+//   Session.findByIdAndDelete({ accessToken })
+//     .then(() => {
+//       res.status(200).json({ success: "AccessToken deleted" });
+//     })
+//     .catch((error) => res.status(500).json({ errorMessage: error }));
+// });
 router.post("/logout", (req, res) => {
   Session.deleteOne({
     userId: req.body.accessToken,
@@ -132,10 +179,22 @@ router.post("/logout", (req, res) => {
     .catch((error) => res.status(500).json({ errorMessage: error }));
 });
 
+/**  ============================
+ *          Validate session token Router
+ *   ============================
+ */
 router.get("/session/:accessToken", (req, res) => {
   const { accessToken } = req.params;
   Session.findById({ _id: accessToken })
-    .populate("userId")
+    .populate("userId features")
+    .populate({
+      path: "userId",
+      populate: {
+        path: "features",
+        model: "Features",
+      },
+    })
+
     .then((session) => {
       if (!session) {
         res.status(200).json({

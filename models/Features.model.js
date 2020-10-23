@@ -1,10 +1,12 @@
 // models/Features.model.js
 
 const { Schema, model } = require("mongoose");
+const ObjectId = Schema.Types.ObjectId;
 const { isProd } = require("../utils");
+
 const FeaturesSchema = new Schema(
   {
-    author: { type: Schema.Types.ObjectId, ref: "User" },
+    author: { type: ObjectId, ref: "User" },
     size: {
       type: String,
       enum: ["small", "medium", "large"],
