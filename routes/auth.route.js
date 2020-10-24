@@ -123,14 +123,14 @@ router.post("/login", async (req, res, next) => {
 
     return res.status(200).json({ accessToken: session._id, user, features });
   } catch (error) {
-    if (!user) {
-      res.status(200).json({
-        errorMessage: "Email is not registered. Try with other email.",
-      });
-    }
-    if (!bcryptjs.compareSync(password, user.password)) {
-      res.status(200).json({ errorMessage: "Incorrect password." });
-    }
+    // if (!user) {
+    //   res.status(400).json({
+    //     errorMessage: "Email is not registered. Try with other email.",
+    //   });
+    // }
+    // if (!bcryptjs.compareSync(password, user.password)) {
+    //   res.status(400).json({ errorMessage: "Incorrect password." });
+    // }
     res.status(500).json({ errorMessage: error });
   }
 
@@ -160,19 +160,9 @@ router.post("/login", async (req, res, next) => {
  *   ============================
  */
 
-// router.delete("/logout/:accessToken", (req, res) => {
-//   const { accessToken } = req.params;
-//   console.log("delete accessToken", accessToken);
-//   Session.findByIdAndDelete({ accessToken })
-//     .then(() => {
-//       res.status(200).json({ success: "AccessToken deleted" });
-//     })
-//     .catch((error) => res.status(500).json({ errorMessage: error }));
-// });
-router.post("/logout", (req, res) => {
-  Session.deleteOne({
-    userId: req.body.accessToken,
-  })
+router.post("/logout/:_id", (req, res) => {
+  const _id = req.params;
+  Session.findByIdAndDelete(_id)
     .then((session) => {
       res.status(200).json({ success: "User was logged out" });
     })
