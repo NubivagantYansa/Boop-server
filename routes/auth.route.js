@@ -104,55 +104,30 @@ router.post("/login", async (req, res, next) => {
   }
 
   try {
-    //find user
     const user = await User.findOne({ email });
     console.log("user", user);
-    //check password
-    const passwordCheck = await bcryptjs.compareSync(password, user.password);
-    //create session
-    let session;
-    if (passwordCheck) {
-      session = await Session.create({
-        userId: user._id,
-        createdAt: Date.now(),
+    if (!user) {
+      return res.status(404).json({
+        errorMessage: "Email is not registered. Try with other email.",
       });
     }
-    //get features
+    const passwordCheck = await bcryptjs.compareSync(password, user.password);
+    if (!passwordCheck) {
+      return res.status(400).json({ errorMessage: "Incorrect password." });
+    }
+
+    const session = await Session.create({
+      userId: user._id,
+      createdAt: Date.now(),
+    });
+
     const features = await Features.findOne({ author: user._id });
     console.log("HERE THE FEATURES", features);
 
     return res.status(200).json({ accessToken: session._id, user, features });
   } catch (error) {
-    // if (!user) {
-    //   res.status(400).json({
-    //     errorMessage: "Email is not registered. Try with other email.",
-    //   });
-    // }
-    // if (!bcryptjs.compareSync(password, user.password)) {
-    //   res.status(400).json({ errorMessage: "Incorrect password." });
-    // }
     res.status(500).json({ errorMessage: error });
   }
-
-  // User.findOne({ email })
-  //   .then((user) => {
-  //     if (!user) {
-  //       res.status(200).json({
-  //         errorMessage: "Email is not registered. Try with other email.",
-  //       });
-  //       return;
-  //     } else if (bcryptjs.compareSync(password, user.password)) {
-  //       Session.create({
-  //         userId: user._id,
-  //         createdAt: Date.now(),
-  //       }).then((session) => {
-  //         res.status(200).json({ accessToken: session._id, user });
-  //       });
-  //     } else {
-  //       res.status(200).json({ errorMessage: "Incorrect password." });
-  //     }
-  //   })
-  //   .catch((error) => res.status(500).json({ errorMessage: error }));
 });
 
 /**  ============================
