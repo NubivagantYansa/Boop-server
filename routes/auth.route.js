@@ -121,10 +121,15 @@ router.post("/login", async (req, res, next) => {
       createdAt: Date.now(),
     });
 
-    const features = await Features.findOne({ author: user._id });
-    console.log("HERE THE FEATURES", features);
+    const featuresDB = await Features.findOne({ author: user._id });
+    console.log("HERE THE FEATURES", featuresDB);
 
-    return res.status(200).json({ accessToken: session._id, user, features });
+    return res.status(200).json({
+      success: "user profile found ",
+      accessToken: session._id,
+      user: { ...user.toJSON(), features: featuresDB },
+      featuresDB,
+    });
   } catch (error) {
     res.status(500).json({ errorMessage: error });
   }
