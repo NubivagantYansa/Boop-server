@@ -28,7 +28,7 @@ router.post("/signup", async (req, res, next) => {
   } = req.body;
 
   if (!username || !email || !toHash) {
-    res.status(200).json({
+    res.status(400).json({
       errorMessage:
         "All fields are mandatory. Please provide your username, email and password.",
     });
@@ -39,7 +39,7 @@ router.post("/signup", async (req, res, next) => {
   if (isProd) {
     const regex = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/;
     if (!regex.test(toHash)) {
-      res.status(200).json({
+      res.status(400).json({
         errorMessage:
           "Password needs to have at least 6 chars and must contain at least one number, one lowercase and one uppercase letter.",
       });
@@ -59,20 +59,25 @@ router.post("/signup", async (req, res, next) => {
       aboutMe,
       borough,
     });
+
     const session = await Session.create({
       userId: user._id,
       createdAt: Date.now(),
     });
+
     const features = await Features.create({ ...featuresDb, author: user._id });
+
     const newUser = await User.findByIdAndUpdate(
       user._id,
       { $addToSet: { features: features._id } },
       { new: true }
     );
 
-    return res
-      .status(200)
-      .json({ accessToken: session._id, user: newUser, features });
+    return res.status(200).json({
+      success: "user created  ",
+      accessToken: session._id,
+      user: { ...newUser.toJSON(), features: features },
+    });
   } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {
       res.status(200).json({ errorMessage: error.message });
@@ -97,7 +102,7 @@ router.post("/login", async (req, res, next) => {
   const { email, password } = req.body;
 
   if (email === "" || password === "") {
-    res.status(500).json({
+    res.status(400).json({
       errorMessage: "Please enter both, email and password to login.",
     });
     return;
