@@ -27,10 +27,32 @@ router.post("/signup", async (req, res, next) => {
     features: featuresDb,
   } = req.body;
 
-  if (!username || !email || !toHash) {
+  if (
+    !username ||
+    !userRole ||
+    !email ||
+    !toHash ||
+    !aboutMe ||
+    !borough ||
+    !image
+  ) {
+    res.status(400).json({
+      errorMessage: "All fields are mandatory. Please fill in all the blanks.",
+    });
+    return;
+  }
+
+  if (
+    !featuresDb.size ||
+    !featuresDb.energy ||
+    !featuresDb.behaves ||
+    !featuresDb.pottyTraining ||
+    !featuresDb.chill ||
+    !featuresDb.breed
+  ) {
     res.status(400).json({
       errorMessage:
-        "All fields are mandatory. Please provide your username, email and password.",
+        "All fields are mandatory. Please provide all the info required.",
     });
     return;
   }

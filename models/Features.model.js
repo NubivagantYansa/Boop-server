@@ -9,7 +9,7 @@ const FeaturesSchema = new Schema(
     author: { type: ObjectId, ref: "User" },
     size: {
       type: String,
-      enum: ["small", "medium", "large"],
+      enum: ["Small", "Medium", "Large"],
       required:
         isProd === "production"
           ? [true, "Size is required, pick one of the listed items"]
@@ -17,7 +17,7 @@ const FeaturesSchema = new Schema(
     },
     energy: {
       type: String,
-      enum: ["tornado", "chilled", "couch potato"],
+      enum: ["Tornado", "Chilled", "Couch potato"],
       required:
         isProd === "production"
           ? [true, "Energy level is required, pick one of the listed items"]
@@ -25,7 +25,7 @@ const FeaturesSchema = new Schema(
     },
     behaves: {
       type: String,
-      enum: ["soldier", "I kinda get it", "huh?"],
+      enum: ["Soldier", "I kinda get it", "huh?"],
       required:
         isProd === "production"
           ? [true, "Behavior is required, pick one of the listed items"]
@@ -33,7 +33,7 @@ const FeaturesSchema = new Schema(
     },
     pottyTraining: {
       type: String,
-      enum: ["expert", "okay", "ouch!"],
+      enum: ["Expert", "Okay", "Ouch!"],
       required:
         isProd === "production"
           ? [
@@ -44,17 +44,17 @@ const FeaturesSchema = new Schema(
     },
     chill: {
       type: String,
-      enum: ["indoor", "outdoor"],
+      enum: ["Indoor", "Outdoor"],
       required:
         isProd === "production"
-          ? [true, "Energy is required, pick one of the listed items"]
+          ? [true, "Chill preference is required, pick one of the listed items"]
           : false,
     },
     breed: {
       type: String,
       required:
         isProd === "production"
-          ? [true, "Energy is required, pick one of the listed items"]
+          ? [true, "Breed is required, pick one of the listed items"]
           : false,
     },
   },
