@@ -129,4 +129,19 @@ router.post("/edit-password", async (req, res) => {
  *   ============================
  */
 
+router.post("/delete-profile/:userId", async (req, res) => {
+  const { userId } = req.params;
+  console.log("reqPARMAS", userId);
+  try {
+    const features = await Features.findOne({ author: userId });
+    const deletedUser = await User.findByIdAndDelete(userId);
+    const deletedFeatures = await Features.findByIdAndDelete(features._id);
+    res.status(200).json({
+      success: "user profile and features deleted",
+    });
+  } catch (error) {
+    console.log(error);
+  }
+});
+
 module.exports = router;
