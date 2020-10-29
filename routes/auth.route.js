@@ -110,28 +110,28 @@ router.post("/signup", async (req, res, next) => {
 
     //send email
 
-    const mailDetails = {
-      from: `"Our Code World " ${process.env.EMAIL}`,
-      to: `${user.email}`,
-      subject: `Boop Email Confirmation`,
-      // text: `Hello , welcome to Boop! `,
-      html: `<b><h1>Hello, ${user.username}</h1>,<p> welcome to Boop! </p><p>Here your details: <strong>email:  ${user.email}</strong><strong>password: toHash</strong>.</p><footnote>Login to edit your details or delete your profile</footnote></b>`,
-    };
+    // const mailDetails = {
+    //   from: `"Our Code World " ${process.env.EMAIL}`,
+    //   to: `${user.email}`,
+    //   subject: `Boop Email Confirmation`,
+    //   // text: `Hello , welcome to Boop! `,
+    //   html: `<b><h1>Hello, ${user.username}</h1>,<p> welcome to Boop! </p><p>Here your details: <strong>email:  ${user.email}</strong><strong>password: toHash</strong>.</p><footnote>Login to edit your details or delete your profile</footnote></b>`,
+    // };
 
-    const mailSent = await mailTransporter.sendEmail(
-      mailDetails,
-      (error, data) => {
-        if (error) {
-          res.status(400).json({
-            errorMessage: "Error while sending email, ",
-            error,
-          });
-          return;
-        } else {
-          console.log("Email sent successfully", data);
-        }
-      }
-    );
+    // const mailSent = await mailTransporter.sendEmail(
+    //   mailDetails,
+    //   (error, data) => {
+    //     if (error) {
+    //       res.status(400).json({
+    //         errorMessage: "Error while sending email, ",
+    //         error,
+    //       });
+    //       return;
+    //     } else {
+    //       console.log("Email sent successfully", data);
+    //     }
+    //   }
+    // );
 
     // send access Token and user (with features in the user object)
     return res.status(200).json({
