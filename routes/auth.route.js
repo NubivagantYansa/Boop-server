@@ -40,7 +40,7 @@ router.post("/signup", async (req, res, next) => {
   ) {
     res.status(400).json({
       errorMessage:
-        "All fields are mandatory. Please provide all the info required.",
+        "All fields and image are mandatory. Please provide all the info required.",
     });
     return;
   }
