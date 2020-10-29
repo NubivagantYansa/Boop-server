@@ -8,6 +8,7 @@ const Session = require("../models/Session.model");
 const Features = require("../models/Features.model");
 const mongoose = require("mongoose");
 const { isProd } = require("../utils");
+const { mailTransporter } = require("../utils/nodemailer");
 
 /**  ============================
  *          Signup
@@ -27,6 +28,7 @@ router.post("/signup", async (req, res, next) => {
     features: featuresDb,
   } = req.body;
 
+  // validation entries and link confirmation
   if (
     !username ||
     !userRole ||
@@ -37,7 +39,8 @@ router.post("/signup", async (req, res, next) => {
     !image
   ) {
     res.status(400).json({
-      errorMessage: "All fields are mandatory. Please fill in all the blanks.",
+      errorMessage:
+        "All fields are mandatory. Please provide all the info required.",
     });
     return;
   }
@@ -57,7 +60,15 @@ router.post("/signup", async (req, res, next) => {
     return;
   }
 
-  // make sure passwords are strong:
+  // if (!user.confirmed) {
+  //   res.status(400).json({
+  //     errorMessage:
+  //       "Please confirm the link.",
+  //   });
+  //   return;
+  // }
+
+  // makes sure passwords are strong:
   if (isProd) {
     const regex = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/;
     if (!regex.test(toHash)) {
@@ -70,8 +81,10 @@ router.post("/signup", async (req, res, next) => {
   }
 
   try {
+    // salt and hash password
     const salt = await bcryptjs.genSalt(saltRounds);
     const password = await bcryptjs.hash(toHash, salt);
+    // create user
     const user = await User.create({
       userRole,
       username,
@@ -81,20 +94,46 @@ router.post("/signup", async (req, res, next) => {
       aboutMe,
       borough,
     });
-
+    // create session
     const session = await Session.create({
       userId: user._id,
       createdAt: Date.now(),
     });
-
+    // create features
     const features = await Features.create({ ...featuresDb, author: user._id });
-
+    // update user with features is
     const newUser = await User.findByIdAndUpdate(
       user._id,
       { $addToSet: { features: features._id } },
       { new: true }
     );
 
+    //send email
+
+    const mailDetails = {
+      from: `"Our Code World " ${process.env.EMAIL}`,
+      to: `${user.email}`,
+      subject: `Boop Email Confirmation`,
+      // text: `Hello , welcome to Boop! `,
+      html: `<b><h1>Hello, ${user.username}</h1>,<p> welcome to Boop! </p><p>Here your details: <strong>email:  ${user.email}</strong><strong>password: toHash</strong>.</p><footnote>Login to edit your details or delete your profile</footnote></b>`,
+    };
+
+    const mailSent = await mailTransporter.sendEmail(
+      mailDetails,
+      (error, data) => {
+        if (error) {
+          res.status(400).json({
+            errorMessage: "Error while sending email, ",
+            error,
+          });
+          return;
+        } else {
+          console.log("Email sent successfully", data);
+        }
+      }
+    );
+
+    // send access Token and user (with features in the user object)
     return res.status(200).json({
       success: "user created  ",
       accessToken: session._id,
@@ -102,9 +141,9 @@ router.post("/signup", async (req, res, next) => {
     });
   } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {
-      res.status(200).json({ errorMessage: error.message });
+      res.status(400).json({ errorMessage: error.message });
     } else if (error.code === 11000) {
-      res.status(200).json({
+      res.status(400).json({
         errorMessage:
           "Username and email need to be unique. Either username or email is already used.",
       });
@@ -123,6 +162,7 @@ router.post("/signup", async (req, res, next) => {
 router.post("/login", async (req, res, next) => {
   const { email, password } = req.body;
 
+  // validation entries
   if (email === "" || password === "") {
     res.status(400).json({
       errorMessage: "Please enter both, email and password to login.",
@@ -131,23 +171,27 @@ router.post("/login", async (req, res, next) => {
   }
 
   try {
+    //find user
     const user = await User.findOne({ email });
     console.log("user", user);
+    // throws error if it can't find user
     if (!user) {
       return res.status(404).json({
         errorMessage: "Email is not registered. Try with other email.",
       });
     }
+    //check if inserted password match the one stored in the database
     const passwordCheck = await bcryptjs.compareSync(password, user.password);
+
     if (!passwordCheck) {
       return res.status(400).json({ errorMessage: "Incorrect password." });
     }
-
+    //creates session
     const session = await Session.create({
       userId: user._id,
       createdAt: Date.now(),
     });
-
+    // finds features using user._id
     const featuresDB = await Features.findOne({ author: user._id });
     console.log("HERE THE FEATURES", featuresDB);
 
@@ -155,7 +199,6 @@ router.post("/login", async (req, res, next) => {
       success: "user profile found ",
       accessToken: session._id,
       user: { ...user.toJSON(), features: featuresDB },
-      featuresDB,
     });
   } catch (error) {
     res.status(500).json({ errorMessage: error });
@@ -170,7 +213,7 @@ router.post("/login", async (req, res, next) => {
 router.post("/logout/:_id", (req, res) => {
   const _id = req.params;
   Session.findByIdAndDelete(_id)
-    .then((session) => {
+    .then(() => {
       res.status(200).json({ success: "User was logged out" });
     })
     .catch((error) => res.status(500).json({ errorMessage: error }));

@@ -29,6 +29,10 @@ const userSchema = new Schema(
       type: String,
       required: isProd ? [true, "Password is required."] : false,
     },
+    //  confirmed: {
+    //   type: Boolean,
+    //   defaultValue: false,
+    // },
     image: {
       type: String,
       required: isProd ? [true, "Image is required."] : false,

@@ -45,4 +45,75 @@ router.get("/get-profile/:id", async (req, res) => {
   }
 });
 
+/**  ============================
+ *         Send Email - user to user
+ *   ============================
+ */
+
+// .post() route ==> to process form data
+router.post("/send-email/:receiver", async (req, res, next) => {
+  const { bodyEmail, sender } = req.body;
+  const { receiver } = req.params;
+
+  // validation entries and link confirmation
+  if (!bodyEmail) {
+    res.status(400).json({
+      errorMessage: "Please write a message for the user.",
+    });
+    return;
+  }
+
+  try {
+    //find senderProfile
+    const senderProfile = await User.findById(sender);
+    console.log("senderProfile", senderProfile);
+    // throws error if it can't find user
+    if (!user) {
+      return res.status(404).json({
+        errorMessage: "Your session expired. Please, login again",
+      });
+    }
+
+    //find receiverProfile
+    const receiverProfile = await User.findById(receiver);
+    console.log("receiverProfile", receiverProfile);
+    // throws error if it can't find user
+    if (!receiverProfile) {
+      return res.status(404).json({
+        errorMessage:
+          "Sorry! There was a problem when sending the email. The account might not longer exist.",
+      });
+    }
+
+    //send email
+
+    const mailDetails = {
+      from: `"Our Code World " ${process.env.EMAIL}`,
+      to: `${receiverProfile.email}`,
+      subject: `Boop - Someone is interested in your profile`,
+      // text: `Hello , welcome to Boop! `,
+      html: `<h1>Hello, ${receiverProfile.username}!<h1> <b>${senderProfile.username} has just sent you the a message! <strong>Message:</strong><p>${bodyEmail}</p></b>`,
+    };
+
+    const mailSent = await mailTransporter.sendEmail(
+      mailDetails,
+      (error, data) => {
+        if (error) {
+          res.status(400).json({
+            errorMessage: "Error while sendin email, ",
+            error,
+          });
+          return;
+        } else {
+          console.log("Email sent successfully", data);
+        }
+      }
+    );
+    return res.status(200).json({
+      success: "Email sent",
+    });
+  } catch (error) {
+    res.status(500).json({ errorMessage: error });
+  }
+});
 module.exports = router;
