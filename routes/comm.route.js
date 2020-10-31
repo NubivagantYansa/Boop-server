@@ -22,7 +22,7 @@ router.get("/get-profiles", async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ errorMessage: error });
+    return res.status(500).json({ errorMessage: error });
   }
 });
 
@@ -41,7 +41,7 @@ router.get("/get-profile/:id", async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ errorMessage: error });
+    return res.status(500).json({ errorMessage: error });
   }
 });
 
@@ -57,10 +57,9 @@ router.post("/send-email/:receiver", async (req, res, next) => {
 
   // validation entries and link confirmation
   if (!bodyEmail) {
-    res.status(400).json({
+    return res.status(400).json({
       errorMessage: "Please write a message for the user.",
     });
-    return;
   }
 
   try {

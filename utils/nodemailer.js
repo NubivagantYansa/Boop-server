@@ -1,16 +1,12 @@
 const nodemailer = require("nodemailer");
 
 const mailTransporter = nodemailer.createTransport({
-  host: "smtp-mail.outlook.com", // hostname
-  port: 587,
-  secure: false, // true for 465, false for other ports
+  host: "smtp.mailtrap.io",
+  port: 2525,
   auth: {
-    user: process.env.EMAIL,
-    pass: process.env.PASS,
-  },
-  tls: {
-    ciphers: "SSLv3",
+    user: "9856fd2193f4af",
+    pass: "1eacb2b0a5ad75",
   },
 });
 
-module.exports = mailTransporter;
+module.exports = { mailTransporter };

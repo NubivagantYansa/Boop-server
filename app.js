@@ -1,7 +1,6 @@
 require("dotenv/config");
 const express = require("express");
 require("./config/db.config");
-
 const app = express();
 require("./setup/index")(app);
 

@@ -42,7 +42,6 @@ router.post("/signup", async (req, res, next) => {
       errorMessage:
         "All fields and image are mandatory. Please provide all the info required.",
     });
-    return;
   }
 
   if (
@@ -93,45 +92,69 @@ router.post("/signup", async (req, res, next) => {
       image,
       aboutMe,
       borough,
+    }).catch((err) => {
+      console.log("first", err);
+      throw new Error(err);
     });
     // create session
     const session = await Session.create({
       userId: user._id,
       createdAt: Date.now(),
+    }).catch((err) => {
+      console.log("Second", err);
+      throw new Error(err);
     });
     // create features
-    const features = await Features.create({ ...featuresDb, author: user._id });
+    const features = await Features.create({
+      ...featuresDb,
+      author: user._id,
+    }).catch((err) => {
+      console.log("third", err);
+      throw new Error(err);
+    });
     // update user with features is
     const newUser = await User.findByIdAndUpdate(
       user._id,
       { $addToSet: { features: features._id } },
       { new: true }
-    );
+    ).catch((err) => {
+      console.log("fourth", err);
+      throw new Error(err);
+    });
 
     //send email
 
-    // const mailDetails = {
-    //   from: `"Our Code World " ${process.env.EMAIL}`,
-    //   to: `${user.email}`,
-    //   subject: `Boop Email Confirmation`,
-    //   // text: `Hello , welcome to Boop! `,
-    //   html: `<b><h1>Hello, ${user.username}</h1>,<p> welcome to Boop! </p><p>Here your details: <strong>email:  ${user.email}</strong><strong>password: toHash</strong>.</p><footnote>Login to edit your details or delete your profile</footnote></b>`,
-    // };
+    console.log("========");
+    console.log("========");
+    console.log(newUser, user);
+    console.log("========");
+    console.log("========");
 
-    // const mailSent = await mailTransporter.sendEmail(
-    //   mailDetails,
-    //   (error, data) => {
-    //     if (error) {
-    //       res.status(400).json({
-    //         errorMessage: "Error while sending email, ",
-    //         error,
-    //       });
-    //       return;
-    //     } else {
-    //       console.log("Email sent successfully", data);
-    //     }
-    //   }
-    // );
+    console.log(user.username);
+
+    const mailDetails = {
+      from: `Debora <${process.env.EMAIL}>`,
+      to: user.email,
+      subject: `Boop Email Confirmation`,
+      // text: `Hello , welcome to Boop! `,
+      text: `Hello  ${user.username}, welcome to Boop! `,
+      html: `<b><h1>Hello, ${user.username}</h1><p> welcome to Boop! </p><p>Here your details: <strong>email:  ${user.email}</strong><strong>password: toHash</strong>.</p><footnote>Login to edit your details or delete your profile</footnote></b>`,
+    };
+
+    const mailSent = await mailTransporter.sendMail(
+      mailDetails
+      // (error, data) => {
+      //   if (error) {
+      //     return res.status(400).json({
+      //       errorMessage: "Error while sending email, ",
+      //       error,
+      //     });
+      //     return;
+      //   } else {
+      //     return console.log("Email sent successfully", data);
+      //   }
+      // }
+    );
 
     // send access Token and user (with features in the user object)
     return res.status(200).json({
@@ -148,7 +171,8 @@ router.post("/signup", async (req, res, next) => {
           "Username and email need to be unique. Either username or email is already used.",
       });
     } else {
-      return res.status(500).json({ errorMessage: error });
+      console.log(error);
+      return res.status(500).json({ errorMessage: "HELLO  am the best" });
     }
   }
 });

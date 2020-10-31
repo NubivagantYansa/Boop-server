@@ -85,7 +85,7 @@ router.post("/edit-password", async (req, res) => {
   if (isProd) {
     const regex = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/;
     if (!regex.test(toHash)) {
-      res.status(200).json({
+      return res.status(200).json({
         errorMessage:
           "Password needs to have at least 6 chars and must contain at least one number, one lowercase and one uppercase letter.",
       });
@@ -121,7 +121,7 @@ router.post("/edit-password", async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ errorMessage: error });
+    return res.status(500).json({ errorMessage: error });
   }
 });
 /**  ============================
@@ -136,11 +136,12 @@ router.post("/delete-profile/:userId", async (req, res) => {
     const features = await Features.findOne({ author: userId });
     const deletedUser = await User.findByIdAndDelete(userId);
     const deletedFeatures = await Features.findByIdAndDelete(features._id);
-    res.status(200).json({
+    return res.status(200).json({
       success: "user profile and features deleted",
     });
   } catch (error) {
     console.log(error);
+    return res.status(500).json({ errorMessage: error });
   }
 });
 
