@@ -38,7 +38,7 @@ router.post("/signup", async (req, res, next) => {
     !borough ||
     !image
   ) {
-    res.status(400).json({
+    return res.status(400).json({
       errorMessage:
         "All fields and image are mandatory. Please provide all the info required.",
     });
@@ -53,7 +53,7 @@ router.post("/signup", async (req, res, next) => {
     !featuresDb.chill ||
     !featuresDb.breed
   ) {
-    res.status(400).json({
+    return res.status(400).json({
       errorMessage:
         "All fields are mandatory. Please provide all the info required.",
     });
@@ -72,7 +72,7 @@ router.post("/signup", async (req, res, next) => {
   if (isProd) {
     const regex = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/;
     if (!regex.test(toHash)) {
-      res.status(400).json({
+      return res.status(400).json({
         errorMessage:
           "Password needs to have at least 6 chars and must contain at least one number, one lowercase and one uppercase letter.",
       });
@@ -141,14 +141,14 @@ router.post("/signup", async (req, res, next) => {
     });
   } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {
-      res.status(400).json({ errorMessage: error.message });
+      return res.status(400).json({ errorMessage: error.message });
     } else if (error.code === 11000) {
-      res.status(400).json({
+      return res.status(400).json({
         errorMessage:
           "Username and email need to be unique. Either username or email is already used.",
       });
     } else {
-      res.status(500).json({ errorMessage: error });
+      return res.status(500).json({ errorMessage: error });
     }
   }
 });
@@ -164,7 +164,7 @@ router.post("/login", async (req, res, next) => {
 
   // validation entries
   if (email === "" || password === "") {
-    res.status(400).json({
+    return res.status(400).json({
       errorMessage: "Please enter both, email and password to login.",
     });
     return;
@@ -201,7 +201,7 @@ router.post("/login", async (req, res, next) => {
       user: { ...user.toJSON(), features: featuresDB },
     });
   } catch (error) {
-    res.status(500).json({ errorMessage: error });
+    return res.status(500).json({ errorMessage: error });
   }
 });
 
@@ -214,7 +214,7 @@ router.post("/logout/:_id", (req, res) => {
   const _id = req.params;
   Session.findByIdAndDelete(_id)
     .then(() => {
-      res.status(200).json({ success: "User was logged out" });
+      return res.status(200).json({ success: "User was logged out" });
     })
     .catch((error) => res.status(500).json({ errorMessage: error }));
 });
@@ -237,11 +237,11 @@ router.get("/session/:accessToken", (req, res) => {
 
     .then((session) => {
       if (!session) {
-        res.status(200).json({
+        return res.status(200).json({
           errorMessage: "Session does not exist",
         });
       } else {
-        res.status(200).json({
+        return res.status(200).json({
           session,
         });
       }
