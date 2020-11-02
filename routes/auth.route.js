@@ -124,14 +124,6 @@ router.post("/signup", async (req, res, next) => {
 
     //send email
 
-    console.log("========");
-    console.log("========");
-    console.log(newUser, user);
-    console.log("========");
-    console.log("========");
-
-    console.log(user.username);
-
     const mailDetails = {
       from: `Debora <${process.env.EMAIL}>`,
       to: user.email,
@@ -141,20 +133,7 @@ router.post("/signup", async (req, res, next) => {
       html: `<b><h1>Hello, ${user.username}</h1><p> welcome to Boop! </p><p>Here your details: <strong>email:  ${user.email}</strong><strong>password: toHash</strong>.</p><footnote>Login to edit your details or delete your profile</footnote></b>`,
     };
 
-    const mailSent = await mailTransporter.sendMail(
-      mailDetails
-      // (error, data) => {
-      //   if (error) {
-      //     return res.status(400).json({
-      //       errorMessage: "Error while sending email, ",
-      //       error,
-      //     });
-      //     return;
-      //   } else {
-      //     return console.log("Email sent successfully", data);
-      //   }
-      // }
-    );
+    const mailSent = await mailTransporter.sendMail(mailDetails);
 
     // send access Token and user (with features in the user object)
     return res.status(200).json({

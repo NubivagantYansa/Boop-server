@@ -4,7 +4,7 @@ const User = require("../models/User.model");
 const Session = require("../models/Session.model");
 const Features = require("../models/Features.model");
 const mongoose = require("mongoose");
-
+const { mailTransporter } = require("../utils/nodemailer");
 const { isProd } = require("../utils");
 
 /**  ============================
@@ -35,7 +35,6 @@ router.get("/get-profile/:id", async (req, res) => {
   const id = req.params.id;
   try {
     const profile = await User.findById(id).populate("features");
-    console.log("PROFILE FOUNDDD", profile);
     return res.status(200).json({
       profile,
     });
@@ -54,7 +53,7 @@ router.get("/get-profile/:id", async (req, res) => {
 router.post("/send-email/:receiver", async (req, res, next) => {
   const { bodyEmail, sender } = req.body;
   const { receiver } = req.params;
-
+  console.log(bodyEmail);
   // validation entries and link confirmation
   if (!bodyEmail) {
     return res.status(400).json({
@@ -63,53 +62,30 @@ router.post("/send-email/:receiver", async (req, res, next) => {
   }
 
   try {
+    //find receiverProfile
+    const receiverProfile = await User.findById(receiver);
+    console.log("receiverProfileeeeeee", receiverProfile);
+
     //find senderProfile
     const senderProfile = await User.findById(sender);
     console.log("senderProfile", senderProfile);
-    // throws error if it can't find user
-    if (!user) {
-      return res.status(404).json({
-        errorMessage: "Your session expired. Please, login again",
-      });
-    }
 
-    //find receiverProfile
-    const receiverProfile = await User.findById(receiver);
-    console.log("receiverProfile", receiverProfile);
-    // throws error if it can't find user
-    if (!receiverProfile) {
-      return res.status(404).json({
-        errorMessage:
-          "Sorry! There was a problem when sending the email. The account might not longer exist.",
-      });
-    }
-
+    console.log("emaiLLLLLLLLLLLLLLLL", receiverProfile.email);
     //send email
 
     const mailDetails = {
-      from: `"Our Code World " ${process.env.EMAIL}`,
-      to: `${receiverProfile.email}`,
+      from: `Debora <${process.env.EMAIL}>`,
+      to: receiverProfile.email,
       subject: `Boop - Someone is interested in your profile`,
-      // text: `Hello , welcome to Boop! `,
-      html: `<h1>Hello, ${receiverProfile.username}!<h1> <b>${senderProfile.username} has just sent you the a message! <strong>Message:</strong><p>${bodyEmail}</p></b>`,
+      html: `<b>Hello, ${receiverProfile.username}!
+      ${senderProfile.username} has just sent you a message! Message: ${bodyEmail}</b>`,
     };
 
-    const mailSent = await mailTransporter.sendEmail(
-      mailDetails,
-      (error, data) => {
-        if (error) {
-          res.status(400).json({
-            errorMessage: "Error while sendin email, ",
-            error,
-          });
-          return;
-        } else {
-          console.log("Email sent successfully", data);
-        }
-      }
-    );
+    const mailSent = await mailTransporter.sendMail(mailDetails);
+
     return res.status(200).json({
       success: "Email sent",
+      mailDetails,
     });
   } catch (error) {
     res.status(500).json({ errorMessage: error });
