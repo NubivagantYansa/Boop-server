@@ -91,4 +91,10 @@ router.post("/send-email/:receiver", async (req, res, next) => {
     res.status(500).json({ errorMessage: error });
   }
 });
+
+/**  ============================
+ *         Send instant messages - chat
+ *   ============================
+ */
+
 module.exports = router;

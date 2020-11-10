@@ -24,7 +24,15 @@ router.post("/image", uploadCloud.single("image"), (req, res) => {
  */
 router.post("/edit", async (req, res) => {
   const accessToken = req.headers.accesstoken;
-  const { userRole, username, email, aboutMe, image, borough } = req.body;
+  const {
+    userRole,
+    username,
+    email,
+    aboutMe,
+    image,
+    borough,
+    features,
+  } = req.body;
 
   const userInfoNew = Object.fromEntries(
     Object.entries({
@@ -38,7 +46,7 @@ router.post("/edit", async (req, res) => {
   );
 
   const featuresNew = Object.fromEntries(
-    Object.entries(req.body.features).filter((el) => el[1])
+    Object.entries(features).filter((el) => el[1])
   );
 
   try {
@@ -85,11 +93,10 @@ router.post("/edit-password", async (req, res) => {
   if (isProd) {
     const regex = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/;
     if (!regex.test(toHash)) {
-      return res.status(200).json({
+      return res.status(400).json({
         errorMessage:
           "Password needs to have at least 6 chars and must contain at least one number, one lowercase and one uppercase letter.",
       });
-      return;
     }
   }
   try {
