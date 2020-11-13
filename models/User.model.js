@@ -3,6 +3,7 @@
 const { Schema, model } = require("mongoose");
 const ObjectId = Schema.Types.ObjectId;
 const { isProd } = require("../utils");
+const geocoder = require("../utils/geocoder");
 
 const userSchema = new Schema(
   {
@@ -29,10 +30,6 @@ const userSchema = new Schema(
       type: String,
       required: isProd ? [true, "Password is required."] : false,
     },
-    //  confirmed: {
-    //   type: Boolean,
-    //   defaultValue: false,
-    // },
     image: {
       type: String,
       required: isProd ? [true, "Image is required."] : false,
@@ -41,9 +38,21 @@ const userSchema = new Schema(
       type: String,
       required: isProd ? [true, "A brief description is required."] : false,
     },
-    borough: {
+    address: {
       type: String,
-      required: isProd ? [true, "Please pick a Borough"] : false,
+      required: [true, "Please add an address."],
+    },
+    //from mapbox
+    location: {
+      type: {
+        type: String,
+        enum: ["Point"],
+      },
+      coordinates: {
+        type: [Number],
+        index: "2dsphere",
+      },
+      formattedAddress: String,
     },
     features: { type: ObjectId, ref: "Features" },
   },
@@ -51,5 +60,18 @@ const userSchema = new Schema(
     timestamps: true,
   }
 );
+
+//. Geocode and create location
+//.pre --> it happens before it is saved in the database
+userSchema.pre("save", async function (next) {
+  const location = await geocoder.geocode(this.address);
+  //format as a Point
+  this.location = {
+    type: "Point",
+    coordinates: [location[0].longitude, location[0].latitude],
+    formattedAddress: location[0].formattedAddress,
+  };
+  next();
+});
 
 module.exports = model("User", userSchema);

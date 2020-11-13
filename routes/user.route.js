@@ -8,6 +8,7 @@ const uploadCloud = require("../config/cloudinary");
 const bcryptjs = require("bcryptjs");
 const saltRounds = 10;
 const { isProd } = require("../utils");
+const geocoder = require("../utils/geocoder");
 
 /**  ============================
  *          Upload Image
@@ -30,7 +31,7 @@ router.post("/edit", async (req, res) => {
     email,
     aboutMe,
     image,
-    borough,
+    address,
     features,
   } = req.body;
 
@@ -41,10 +42,20 @@ router.post("/edit", async (req, res) => {
       email,
       aboutMe,
       image,
-      borough,
+      address,
     }).filter((el) => el[1])
   );
 
+  let location;
+
+  location = await geocoder.geocode(address).then((response) => ({
+    type: "Point",
+    coordinates: [response[0].longitude, response[0].latitude],
+    formattedAddress: response[0].formattedAddress,
+  }));
+
+  userInfoNew.location = location;
+  console.log(userInfoNew);
   const featuresNew = Object.fromEntries(
     Object.entries(features).filter((el) => el[1])
   );
@@ -67,6 +78,7 @@ router.post("/edit", async (req, res) => {
         new: true,
       }
     );
+
     return res.status(200).json({
       success: "user profile updated ",
       //...user.toJSON() is giving me the bit of the mongoose obj I need plus I overwrite the property features(which contains the features._id) wit hthe values that are contained in featuesDB which are the actual values

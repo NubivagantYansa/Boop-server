@@ -24,7 +24,7 @@ router.post("/signup", async (req, res, next) => {
     email,
     image,
     aboutMe,
-    borough,
+    address,
     features: featuresDb,
   } = req.body;
 
@@ -35,7 +35,7 @@ router.post("/signup", async (req, res, next) => {
     !email ||
     !toHash ||
     !aboutMe ||
-    !borough ||
+    !address ||
     !image
   ) {
     return res.status(400).json({
@@ -56,16 +56,7 @@ router.post("/signup", async (req, res, next) => {
       errorMessage:
         "All fields are mandatory. Please provide all the info required.",
     });
-    return;
   }
-
-  // if (!user.confirmed) {
-  //   res.status(400).json({
-  //     errorMessage:
-  //       "Please confirm the link.",
-  //   });
-  //   return;
-  // }
 
   // makes sure passwords are strong:
   if (isProd) {
@@ -75,7 +66,6 @@ router.post("/signup", async (req, res, next) => {
         errorMessage:
           "Password needs to have at least 6 chars and must contain at least one number, one lowercase and one uppercase letter.",
       });
-      return;
     }
   }
 
@@ -91,7 +81,7 @@ router.post("/signup", async (req, res, next) => {
       email,
       image,
       aboutMe,
-      borough,
+      address,
     }).catch((err) => {
       console.log("first", err);
       throw new Error(err);
@@ -151,7 +141,7 @@ router.post("/signup", async (req, res, next) => {
       });
     } else {
       console.log(error);
-      return res.status(500).json({ errorMessage: "HELLO  am the best" });
+      return res.status(500).json({ errorMessage: error });
     }
   }
 });
