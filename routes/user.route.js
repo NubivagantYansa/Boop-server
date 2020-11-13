@@ -25,6 +25,7 @@ router.post("/image", uploadCloud.single("image"), (req, res) => {
  */
 router.post("/edit", async (req, res) => {
   const accessToken = req.headers.accesstoken;
+  console.log(accessToken);
   const {
     userRole,
     username,
@@ -46,21 +47,20 @@ router.post("/edit", async (req, res) => {
     }).filter((el) => el[1])
   );
 
-  let location;
-
-  location = await geocoder.geocode(address).then((response) => ({
-    type: "Point",
-    coordinates: [response[0].longitude, response[0].latitude],
-    formattedAddress: response[0].formattedAddress,
-  }));
-
-  userInfoNew.location = location;
-  console.log(userInfoNew);
   const featuresNew = Object.fromEntries(
     Object.entries(features).filter((el) => el[1])
   );
+  let location;
 
   try {
+    location = await geocoder.geocode(address).then((response) => ({
+      type: "Point",
+      coordinates: [response[0].longitude, response[0].latitude],
+      formattedAddress: response[0].formattedAddress,
+    }));
+
+    userInfoNew.location = location;
+
     const session = await Session.findById(accessToken);
     if (!session) {
       return res.status(400).json({ errorMessage: "Session not found" });
