@@ -3,7 +3,6 @@ const router = require("express").Router();
 const User = require("../models/User.model");
 const Session = require("../models/Session.model");
 const Features = require("../models/Features.model");
-const mongoose = require("mongoose");
 const uploadCloud = require("../config/cloudinary");
 const bcryptjs = require("bcryptjs");
 const saltRounds = 10;
@@ -25,7 +24,6 @@ router.post("/image", uploadCloud.single("image"), (req, res) => {
  */
 router.post("/edit", async (req, res) => {
   const accessToken = req.headers.accesstoken;
-  console.log(accessToken);
   const {
     userRole,
     username,

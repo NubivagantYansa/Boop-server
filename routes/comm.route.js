@@ -1,11 +1,7 @@
 // routes/user.routes.js
 const router = require("express").Router();
 const User = require("../models/User.model");
-const Session = require("../models/Session.model");
-const Features = require("../models/Features.model");
-const mongoose = require("mongoose");
 const { mailTransporter } = require("../utils/nodemailer");
-const { isProd } = require("../utils");
 
 /**  ============================
  *         Get all profiles
