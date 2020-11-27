@@ -21,7 +21,7 @@ const userSchema = new Schema(
     email: {
       type: String,
       required: isProd ? [true, "Email is required."] : false,
-      // match: [/^\S+@\S+\.\S+$/, "Please use a valid email address."],
+      match: [/^\S+@\S+\.\S+$/, "Please use a valid email address."],
       unique: true,
       lowercase: true,
       trim: true,
