@@ -50,8 +50,8 @@ This is a platform where dog owners can look for dogsitters and vice versa.
 | Path              | Component                     | Permissions                | Behavior                                                                                                           |
 | ----------------- | ----------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | `/`               | Home                          | public `<AnonRoute>`       | Preview limited number of profiles. Link to signup page when click on users cards.                                 |
-| `/auth/signup`    | SignUp                        | anon only `<AnonRoute>`    | Signup form, link to login, new user form, navigate to homepage after signup.                                      |
-| `/auth/login`     | LogIn                         | anon only `<AnonRoute>`    | Login form, link to signup, navigate to homepage after login.                                                      |
+| `/signup`         | SignUp                        | anon only `<AnonRoute>`    | Signup form, link to login, new user form, navigate to homepage after signup.                                      |
+| `/login`          | LogIn                         | anon only `<AnonRoute>`    | Login form, link to signup, navigate to homepage after login.                                                      |
 | `/auth/logout`    | n/a                           | user only `<PrivateRoute>` | Navigate to Home screen after logout, expire session.                                                              |
 | `/board`          | Board                         | user only `<PrivateRoute>` | Shows users profiles and filters otions. Links to single users' profiles.                                          |
 | `/dashboard`      | Dashboard, Settings, Search   | user only `<PrivateRoute>` | Show user's details, links to Home, Settings (links to edit profile, password, delete profile) and Search (Board). |
@@ -71,12 +71,12 @@ This is a platform where dog owners can look for dogsitters and vice versa.
   - Input: all profiles
   - Output: profile(userId)
 - User:
-  -Dasboard
+  - Dasboard
   - Input: profile(userId)
   - Output: none
     -EditProfile
   - Input: profile(userId)
-  - Output: profile(userRole, username, password, email, image, aboutMe) address, Features(populate
+  - Output: profile(userRole, username, password, email, image, aboutMe, address), Features(populate
     -EditPassword
   - Input: profile(userId)
   - Output: none
@@ -87,7 +87,6 @@ This is a platform where dog owners can look for dogsitters and vice versa.
   - Input: all profiles
   - Output: filtered results
     -DeleteProfile
-- PublicProfile
 
 <br>
 
@@ -248,16 +247,16 @@ Features {
 ## Endpoints (backend routes)
 
 | HTTP Method | URL                        | Request Body                                                                                     | Success Status       | Error Status | Description                                                                                                           |
-| ----------- | -------------------------- | ------------------------------------------------------------------------------------------------ | -------------------- | ------------ | --------------------------------------------------------------------------------------------------------------------- | --- |
-| POST        | `/auth/signup`             | {userRole, username, password, email, image, aboutMe, address, Features(populate)}               | 201 with user object | 404          | validation: fields not empty (422), user not exists (409), create user with encrypted password, store user in session |     |
+| ----------- | -------------------------- | ------------------------------------------------------------------------------------------------ | -------------------- | ------------ | --------------------------------------------------------------------------------------------------------------------- |
+| POST        | `/auth/signup`             | {userRole, username, password, email, image, aboutMe, address, Features(populate)}               | 201 with user object | 404          | validation: fields not empty (422), user not exists (409), create user with encrypted password, store user in session |
 | POST        | `/auth/login`              | {username, password}                                                                             | 200 with user object | 404          | validation: fields not empty (422), user exists (404), passdword matches (404), store user in session                 |
-| POST        | `/auth/logout`             | (empty)                                                                                          | 204                  | 400          |
+| POST        | `/auth/logout`             | (empty)                                                                                          | 204                  | 400          | Logout                                                                                                                |
 | POST        | `/user-edit`               | { accessToken, userRole, username, password, email, image, aboutMe, address, Features(populate)} | 200                  | 400          | Edit user details                                                                                                     |
 | POST        | `/image`                   | {image }                                                                                         | 200                  | 400          | Upload Image to cloudinary                                                                                            |
 | POST        | `/delete-profile/:userId/` | { userId }                                                                                       | 200                  | 400          | Delete user profile                                                                                                   |
 | POST        | `/edit-password`           | {password}                                                                                       | 200                  | 404          | Edit password                                                                                                         |
 | GET         | `/session/:accessToken`    | {accessToken}                                                                                    | 200                  | 404          | Validate session token Router                                                                                         |
-| DELETE      | `/profile/delete`          |                                                                                                  | 200                  | 400          | Delete profile                                                                                                        |
+| DELETE      | `/profile/delete`          | {userId}                                                                                         | 200                  | 400          | Delete profile                                                                                                        |
 | GET         | `/get-profiles`            | (empty)                                                                                          | 200                  | 404          | List all profiles                                                                                                     |
 | GET         | `/get-profile/:id`         | (empty)                                                                                          | 200                  | 404          | List deatils specific profile                                                                                         |
 | POST        | `/send-email/:receiver`    | {bodyEmail, sender, receiver}                                                                    | 200                  | 404          | Send email                                                                                                            |
@@ -276,7 +275,7 @@ Features {
 
 [Client Repository](https://github.com/NubivagantYansa/Boop_Client)
 
-[Deployed App Link](
+[Deployed App Link](https://b00p.netlify.app)
 
 ### Slides
 
