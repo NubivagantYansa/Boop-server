@@ -82,35 +82,23 @@ router.post("/signup", async (req, res, next) => {
       image,
       aboutMe,
       address,
-    }).catch((err) => {
-      console.log("first", err);
-      throw new Error(err);
     });
     // create session
     const session = await Session.create({
       userId: user._id,
       createdAt: Date.now(),
-    }).catch((err) => {
-      console.log("Second", err);
-      throw new Error(err);
     });
     // create features
     const features = await Features.create({
       ...featuresDb,
       author: user._id,
-    }).catch((err) => {
-      console.log("third", err);
-      throw new Error(err);
     });
     // update user with features is
     const newUser = await User.findByIdAndUpdate(
       user._id,
       { $addToSet: { features: features._id } },
       { new: true }
-    ).catch((err) => {
-      console.log("fourth", err);
-      throw new Error(err);
-    });
+    );
 
     //send email
 
